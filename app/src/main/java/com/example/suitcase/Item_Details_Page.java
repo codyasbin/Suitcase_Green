@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextPaint;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -20,8 +19,7 @@ public class Item_Details_Page extends AppCompatActivity {
     CircleImageView circleImageView;
     ActivityItemDetailsPageBinding binding;
 
-    //Define variable
-
+    // Define variable
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String PRICE = "price";
@@ -30,16 +28,15 @@ public class Item_Details_Page extends AppCompatActivity {
     public static final String IS_PURCHASED = "purchased";
     public static final int EDIT_ITEM_REQUEST = 10001;
 
-    //get Intent
+    ItemsModel item;
+    DatabaseHelper items_dbHelper;
 
+    // Get Intent
     public static Intent getIntent(Context context, int id){
         Intent intent = new Intent(context, Item_Details_Page.class);
         intent.putExtra(ID,id);
         return intent;
     }
-
-    ItemsModel item;
-    DatabaseHelper items_dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,18 +52,17 @@ public class Item_Details_Page extends AppCompatActivity {
         int id = bundle.getInt(Item_Details_Page.ID);
         Log.d("Items_Details_Page", id+"");
 
-        item=retrieveData(id);
+        item = retrieveData(id);
         binding.imageViewItem.setImageURI(item.getImage());
         binding.textViewName.setText(item.getName());
-
         binding.textViewPrice.setText(String.valueOf(item.getPrice()));
         binding.textViewDescription.setText(item.getDescription());
 
-        //click Method on Edit Button
-        binding.buttonEditItem.setOnClickListener(v -> startEditItems(v,item));
+        // Click Method on Edit Button
+        binding.buttonEditItem.setOnClickListener(v -> startEditItems(item));
 
-        //click Method of Share Button
-        binding.buttonShareItem.setOnClickListener(this::startShareItemActivity);
+        // Click Method of Share Button
+        binding.buttonShareItem.setOnClickListener(v -> startShareItemActivity(item));
 
         circleImageView = findViewById(R.id.backBtn);
 
@@ -78,12 +74,11 @@ public class Item_Details_Page extends AppCompatActivity {
         });
     }
 
-    public void startEditItems(View v, ItemsModel item){
-        startActivity(EditItem.getIntent(getApplicationContext(),item));
+    private void startEditItems(ItemsModel item){
+        startActivity(EditItem.getIntent(getApplicationContext(), item));
     }
 
     private ItemsModel retrieveData(int id){
-
         Cursor cursor = items_dbHelper.getItemById(id);
         cursor.moveToNext();
         ItemsModel itemsModel = new ItemsModel();
@@ -93,23 +88,25 @@ public class Item_Details_Page extends AppCompatActivity {
         itemsModel.setDescription(cursor.getString(3));
         itemsModel.setImage(Uri.EMPTY);
 
-        try{
+        try {
             Uri imageUri = Uri.parse(cursor.getString(4));
             itemsModel.setImage(imageUri);
-        }catch (NullPointerException e){
-            Toast.makeText(this, "Error occurred is identifying image resource", Toast.LENGTH_SHORT).show();
+        } catch (NullPointerException e) {
+            Toast.makeText(this, "Error occurred in identifying image resource", Toast.LENGTH_SHORT).show();
         }
 
-        itemsModel.setPurchased(cursor.getInt(5)==1);
-        Log.d("Items_Details_Page",itemsModel.toString());
+        itemsModel.setPurchased(cursor.getInt(5) == 1);
+        Log.d("Items_Details_Page", itemsModel.toString());
         return itemsModel;
-
     }
-    public void startShareItemActivity(View view){
+
+    private void startShareItemActivity(ItemsModel item){
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_SUBJECT,"");
-        intent.putExtra(Intent.EXTRA_TEXT,"Check Your Cool Application");
-        startActivity(Intent.createChooser(intent,"Share via"));
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Check out this item: " + item.getName());
+        intent.putExtra(Intent.EXTRA_TEXT, "Item Name: " + item.getName() +
+                "\nPrice: " + item.getPrice() +
+                "\nDescription: " + item.getDescription());
+        startActivity(Intent.createChooser(intent, "Share via"));
     }
 }

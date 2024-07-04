@@ -63,8 +63,10 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 } else if (id == R.id.item_about) {
                     Toast.makeText(MainActivity.this, "Click About Menu", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), profile.class);
+                    startActivity(intent);
                 } else if (id == R.id.item_contact) {
-                    Toast.makeText(MainActivity.this, "Click Item Menu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Click Contact Menu", Toast.LENGTH_SHORT).show();
                 } else if (id == R.id.item_logout) {
                     Toast.makeText(MainActivity.this, "You logged out Successfully", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(MainActivity.this, Login_Page.class));
